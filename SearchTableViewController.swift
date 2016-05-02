@@ -25,6 +25,18 @@ class SearchTableViewController: UITableViewController {
         
         tableView.setContentOffset(CGPoint(x: 0, y: searchController.searchBar.frame.size.height), animated: false)
         
+        var titles = [String]()
+        titles.append("All")
+        
+        for record in records.array! {
+            let region = record["region"].stringValue
+            if (!titles.contains(region) && region != ""){
+                titles.append(region)
+            }
+        }
+        
+        searchController.searchBar.scopeButtonTitles = titles
+        searchController.searchBar.delegate = self
         
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -74,9 +86,10 @@ class SearchTableViewController: UITableViewController {
         return cell
     }
  
-    func filteredContentForSearchText(searchText: String){
+    func filteredContentForSearchText(searchText: String, scope: String = "All"){
         filteredRecords = records.array!.filter { record in
-            return record["name"]["common"].stringValue.lowercaseString.containsString(searchText.lowercaseString)
+            let typeMatch = (scope == "All" || record["region"].stringValue == scope)
+            return typeMatch && record["name"]["common"].stringValue.lowercaseString.containsString(searchText.lowercaseString)
         }
         tableView.reloadData()
     }
@@ -131,9 +144,22 @@ class SearchTableViewController: UITableViewController {
 
 extension SearchTableViewController: UISearchResultsUpdating{
     func updateSearchResultsForSearchController(searchController: UISearchController) {
-        filteredContentForSearchText(searchController.searchBar.text!)
+        let searchBar = searchController.searchBar
+        let scope = searchBar.scopeButtonTitles![searchBar.selectedScopeButtonIndex]
+        filteredContentForSearchText(searchController.searchBar.text!, scope: scope)
     }
 }
+
+
+extension SearchTableViewController: UISearchBarDelegate{
+    func searchBar(searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int){
+        filteredContentForSearchText(searchBar.text!, scope: searchBar.scopeButtonTitles![selectedScope])
+    }
+}
+
+
+
+
 
 
 
