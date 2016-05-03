@@ -34,7 +34,7 @@ class SearchTableViewController: UITableViewController {
                 titles.append(region)
             }
         }
-        
+        //Teste Commit
         searchController.searchBar.scopeButtonTitles = titles
         searchController.searchBar.delegate = self
         
